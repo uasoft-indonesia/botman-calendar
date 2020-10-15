@@ -1,0 +1,13 @@
+{
+    "name": "uasoft-indonesia/botman-calendar",
+    "description": "inline keyboard for telegram bot",
+    "type": "library",
+    "authors": [
+        {
+            "name": "UASOFT Fikri",
+            "email": "fikri@uatech.co.id"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
