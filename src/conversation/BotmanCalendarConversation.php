@@ -20,6 +20,15 @@ class BotmanCalendarConversation extends Conversation
     protected $start_year;
     protected $end_year;
 
+    public function run()
+    {
+        $date = new \DateTime('now');
+        $this->current_month = $date->format('m');
+        $this->current_year = $date->format('Y');
+        $this->start_year = $this->current_year;
+        $this->askDate();
+    }
+
     public function createDaysOfMonth($year = null, $month = null)
     {
         // DECLARE PARAMETER
@@ -186,27 +195,14 @@ class BotmanCalendarConversation extends Conversation
         return $this->calendar->toArray();
     }
 
-    public function run()
-    {
-        $date = new \DateTime('now');
-        $this->current_month = $date->format('m');
-        $this->current_year = $date->format('Y');
-        $this->start_year = $this->current_year;
-        $this->askDate();
-    }
-
     public function askDate()
     {
         $calendar = $this->createDaysOfMonth();
         $this->ask($this->message, function (Answer $answer) {
             $date = $answer->getValue();
-            $this->say($date);
             if (strlen($date) == 10 || strlen($date) == 9 || strlen($date) == 8) {
-                if (!is_null($this->callback)) {
-                    $callback = $this->callback;
-                    // $callback($date);
-                    serialize($callback($date));
-                }
+                $this->selected_date = $date;
+                $this->runCallBack();
             } elseif (strlen($date) == 7 || strlen($date) == 6) {
                 $this->askMonth();
             } else {
@@ -227,6 +223,10 @@ class BotmanCalendarConversation extends Conversation
                 }
                 $this->askDate();
             }
+            $this->deleteMessage(
+                $answer->getMessage()->getPayload()['chat']['id'],
+                $answer->getMessage()->getPayload()['message_id']
+            );
         }, $calendar->toArray());
     }
 
@@ -251,6 +251,10 @@ class BotmanCalendarConversation extends Conversation
                     $this->askMonth();
                 }
             }
+            $this->deleteMessage(
+                $answer->getMessage()->getPayload()['chat']['id'],
+                $answer->getMessage()->getPayload()['message_id']
+            );
         }, $calendar->toArray());
     }
 
@@ -273,11 +277,34 @@ class BotmanCalendarConversation extends Conversation
                     $this->askYear();
                 }
             }
+            $this->deleteMessage(
+                $answer->getMessage()->getPayload()['chat']['id'],
+                $answer->getMessage()->getPayload()['message_id']
+            );
         }, $calendar->toArray());
     }
 
     public function getSelectedDate()
     {
         return $this->selected_date;
+    }
+
+    public function runCallBack()
+    {
+        $this->say($this->selected_date);
+        if (!is_null($this->callback)) {
+            $callback = $this->callback;
+            // $callback($date);
+            serialize($callback($this->selected_date));
+        }
+    }
+
+    private function deleteMessage($chat_id, $message_id)
+    {
+        $parameter = [
+            'chat_id' => $chat_id,
+            'message_id' => $message_id,
+        ];
+        $this->bot->sendRequest('deleteMessage', $parameter);
     }
 }
