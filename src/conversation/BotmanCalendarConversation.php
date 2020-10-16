@@ -20,6 +20,11 @@ class BotmanCalendarConversation extends Conversation
     protected $start_year;
     protected $end_year;
 
+    public function __construct($callback = null)
+    {
+        $this->callback = $callback;
+    }
+
     public function run()
     {
         $date = new \DateTime('now');
