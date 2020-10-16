@@ -10,7 +10,7 @@ use BotMan\Drivers\Telegram\Extensions\KeyboardButton;
 class BotmanCalendarConversation extends Conversation
 {
     public $callback;
-    public $message;
+    public $message = 'Select Date';
 
     protected $current_month;
     protected $current_year;
@@ -205,6 +205,10 @@ class BotmanCalendarConversation extends Conversation
                 $this->runCallBack();
             } elseif (strlen($date) == 7 || strlen($date) == 6) {
                 $this->askMonth();
+                $this->deleteMessage(
+                    $answer->getMessage()->getPayload()['chat']['id'],
+                    $answer->getMessage()->getPayload()['message_id']
+                );
             } else {
                 if ($date == '+') {
                     if ($this->current_month == 12) {
@@ -222,18 +226,18 @@ class BotmanCalendarConversation extends Conversation
                     }
                 }
                 $this->askDate();
+                $this->deleteMessage(
+                    $answer->getMessage()->getPayload()['chat']['id'],
+                    $answer->getMessage()->getPayload()['message_id']
+                );
             }
-            $this->deleteMessage(
-                $answer->getMessage()->getPayload()['chat']['id'],
-                $answer->getMessage()->getPayload()['message_id']
-            );
         }, $calendar->toArray());
     }
 
     public function askMonth()
     {
         $calendar = $this->createMonthsOfYear();
-        $this->ask('Pilih bulan', function (Answer $answer) {
+        $this->ask('Select Month', function (Answer $answer) {
             $date = $answer->getValue();
             if ($date == '+') {
                 ++$this->current_year;
@@ -261,7 +265,7 @@ class BotmanCalendarConversation extends Conversation
     public function askYear()
     {
         $calendar = $this->createYears();
-        $this->ask($this->message, function (Answer $answer) {
+        $this->ask('Select Year', function (Answer $answer) {
             $date = $answer->getValue();
             if ($date == '+') {
                 $this->start_year = $this->start_year + $this->year_length;

@@ -8,12 +8,12 @@ class BotmanCalendar
 {
     protected $calendar;
 
-    public function __construct($msg, $callback = null)
+    public function __construct($msg = 'Select Date', $callback = null)
     {
         $this->startConversation($msg, $callback);
     }
 
-    public function startConversation($msg, $callback)
+    public function startConversation($msg = 'Select Date', $callback)
     {
         $botman = resolve('botman');
         $conversation = new BotmanCalendarConversation();
